@@ -2,6 +2,9 @@
 /dist
 /node_modules
 /build
+/bun.lock
+/package-lock.json
+/generated
 
 # Logs
 logs
