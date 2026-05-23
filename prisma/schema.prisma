@@ -40,4 +40,21 @@ model Category {
   @@index([id])
   
   @@map("categories")
+  products Product[]
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(255)
+  stock Int
+  price Float
+  categoryId Int
+  category Category @relation(fields: [categoryId], references: [id])
+  
+  createAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([id])
+  
+  @@map("products")
 }
