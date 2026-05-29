@@ -24,18 +24,27 @@ export class ProductsService
         );
   
         if (existingProduct) 
-          {
-          throw new ConflictException('El producto con ese nombre ya está en uso');
+        {
+          throw new ConflictException('El producto con ese nombre ya esta en uso');
         }
   
+        const data: any = 
+        {
+          name: createProductDto.name,
+          priceUnit: createProductDto.priceUnit,
+          stock: createProductDto.stock,
+        };
+
+        if (createProductDto.categoryId !== undefined && createProductDto.categoryId !== null) 
+        {
+          data.categoryId = createProductDto.categoryId;
+        }
+
         return await this.prismaService.product.create
         (
           {
-            data: {
-              name: createProductDto.name,
-              priceUnit: createProductDto.priceUnit,
-              categoryId: createProductDto.categoryId,
-            }
+            data,
+            include: { category: true }
           }
         )
       } 
@@ -53,7 +62,8 @@ export class ProductsService
         return await this.prismaService.product.findMany
         (
           {
-            include: {
+            include: 
+            {
               category: true,
             },
             orderBy: 
@@ -81,7 +91,8 @@ export class ProductsService
             {
               id,
             },
-            include: {
+            include: 
+            {
               category: true,
             }
           }
@@ -101,9 +112,9 @@ export class ProductsService
       try 
       {
         if (!product) 
-          {
-            throw new NotFoundException('Producto no encontrado');
-          }
+        {
+          throw new NotFoundException('Producto no encontrado');
+        }
   
         // Validar que el nombre no esté en uso
         const existingProduct = await this.prismaService.product.findFirst
@@ -118,7 +129,7 @@ export class ProductsService
   
         if (existingProduct && existingProduct.id !== id) 
         {
-          throw new ConflictException('El nombre del producto ya está en uso');
+          throw new ConflictException('El nombre del producto ya esta en uso');
         }
   
         return await this.prismaService.product.update
@@ -129,7 +140,8 @@ export class ProductsService
               id,
             },
             data: updateProductDto,
-            include: {
+            include: 
+            {
               category: true,
             }
           }

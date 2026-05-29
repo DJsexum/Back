@@ -13,6 +13,11 @@ enum Role {
   USER
 }
 
+enum MovementType {
+  IN
+  OUT
+}
+
 model User {
   id Int @id @default(autoincrement())
   fullName String @db.VarChar(255)
@@ -23,52 +28,75 @@ model User {
   createAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
+  movements Movements[]
+
   @@index([id])
   @@index([email])
-  
   @@map("users")
 }
 
 model Category {
   id Int @id @default(autoincrement())
-  name String @db.VarChar(255)
+  name String @unique @db.VarChar(255)
 
   
   createAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
-  @@index([id])
-  
-  @@map("categories")
   products Product[]
+
+  @@index([id])
+  @@map("categories")
+
 }
 
 model Product {
   id Int @id @default(autoincrement())
-  name String @db.VarChar(255)
+  name String @unique @db.VarChar(255)
   stock Int @default(0)
   priceUnit Decimal @db.Decimal(10, 2)
   
-  categoryId Int
-  category Category @relation(fields: [categoryId], references: [id])
+  categoryId Int?
+  category Category? @relation(fields: [categoryId], references: [id])
   
   createAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
+  movements Movements[]
+
   @@index([id])
-  
   @@map("products")
 }
 
-model Supplier{
+model Provider{
   id Int @id @default(autoincrement())
   name String @db.VarChar(255)
-  contactInfo String @db.Text()
+  phone String @db.VarChar(50)
+  additionalInfo String? @db.Text()
   
   createAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
   @@index([id])
-  
-  @@map("suppliers")
+  @@map("Providers")
+}
+
+model Movements{
+  id Int @id @default(autoincrement())
+  type MovementType @default(IN)
+  date DateTime @default(now()) @db.Timestamptz(3)
+  amount Int @default(0)
+  priceUnit Decimal @db.Decimal(10, 2)
+
+  productId Int
+  product Product @relation(fields: [productId], references: [id])
+
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+
+  createAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([id])
+  @@map("movements")
 }
