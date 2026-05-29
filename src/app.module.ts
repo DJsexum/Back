@@ -3,10 +3,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
+import { ProductsModule } from './products/products.module';
 
-@Module({
-  imports: [UsersModule, CategoriesModule],
-  controllers: [AppController],
-  providers: [AppService],
-})
+@Module
+(
+  {
+    imports: [UsersModule, CategoriesModule, ProductsModule],
+    controllers: [AppController],
+    providers: [AppService],
+  }
+)
 export class AppModule {}

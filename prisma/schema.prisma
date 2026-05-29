@@ -46,8 +46,9 @@ model Category {
 model Product {
   id Int @id @default(autoincrement())
   name String @db.VarChar(255)
-  stock Int
-  price Float
+  stock Int @default(0)
+  priceUnit Decimal @db.Decimal(10, 2)
+  
   categoryId Int
   category Category @relation(fields: [categoryId], references: [id])
   
@@ -57,4 +58,17 @@ model Product {
   @@index([id])
   
   @@map("products")
+}
+
+model Supplier{
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(255)
+  contactInfo String @db.Text()
+  
+  createAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([id])
+  
+  @@map("suppliers")
 }
