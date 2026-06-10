@@ -1,12 +1,14 @@
 import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsPositive, Min, ValidateNested, ArrayMinSize } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export enum MovementType {
+export enum MovementType 
+{
   IN = 'IN',
   OUT = 'OUT',
 }
 
-export class MovementItemDto {
+export class MovementItemDto 
+{
   @IsInt()
   @Min(1, { message: 'El id del producto debe ser válido' })
   productId!: number;
@@ -16,7 +18,8 @@ export class MovementItemDto {
   amount!: number;
 }
 
-export class CreateMovementDto {
+export class CreateMovementDto 
+{
   @IsEnum(MovementType, { message: 'El tipo de movimiento debe ser IN o OUT' })
   type!: MovementType;
 

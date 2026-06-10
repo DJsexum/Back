@@ -3,7 +3,8 @@ import { MovementsService } from './movements.service';
 import { MovementsController } from './movements.controller';
 import { PrismaService } from '../prisma/prisma.service';
 
-@Module(
+@Module
+(
   {
     imports: [],
     controllers: [MovementsController],

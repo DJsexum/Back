@@ -4,110 +4,150 @@ import { UpdateProviderDto } from './dto/update-provider.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class ProvidersService {
+export class ProvidersService 
+{
   constructor(private prismaService: PrismaService) {}
 
-  async create(createProviderDto: CreateProviderDto) {
-    try {
-      const existingProvider = await this.prismaService.provider.findFirst(
+  async create(createProviderDto: CreateProviderDto) 
+  {
+    try 
+    {
+      const existingProvider = await this.prismaService.provider.findFirst
+      (
         {
-          where: {
+          where: 
+          {
             name: createProviderDto.name,
           },
         }
       );
 
-      if (existingProvider) {
+      if (existingProvider) 
+      {
         throw new ConflictException('El proveedor con ese nombre ya está en uso');
       }
 
-      return await this.prismaService.provider.create({
-        data: createProviderDto,
-      });
-    } catch (error) {
-      console.log(error);
-      throw error;
+      return await this.prismaService.provider.create
+      (
+        {
+          data: createProviderDto,
+        }
+      );
     }
+      catch (error) 
+      {
+        console.log(error);
+        throw error;
+      }
   }
 
-  async findAll() {
-    try {
-      return await this.prismaService.provider.findMany(
+  async findAll() 
+  {
+    try 
+    {
+      return await this.prismaService.provider.findMany
+      (
         {
-          orderBy: {
+          orderBy: 
+          {
             name: 'asc',
           },
         }
       );
-    } catch (error) {
-      console.log(error);
-      throw error;
     }
+      catch (error) 
+      {
+        console.log(error);
+        throw error;
+      }
   }
 
-  async findOne(id: number) {
-    try {
-      return await this.prismaService.provider.findUnique(
+  async findOne(id: number) 
+  {
+    try 
+    {
+      return await this.prismaService.provider.findUnique
+      (
         {
-          where: {
+          where: 
+          {
             id,
           },
         }
       );
-    } catch (error) {
-      console.log(error);
-      throw error;
     }
+      catch (error) 
+      {
+        console.log(error);
+        throw error;
+      }
   }
 
-  async update(id: number, updateProviderDto: UpdateProviderDto) {
+  async update(id: number, updateProviderDto: UpdateProviderDto) 
+  {
     const provider = await this.findOne(id);
 
-    try {
-      if (!provider) {
+    try 
+    {
+      if (!provider) 
+      {
         throw new NotFoundException('Proveedor no encontrado');
       }
 
-      const existingProvider = await this.prismaService.provider.findFirst(
+      const existingProvider = await this.prismaService.provider.findFirst
+      (
         {
-          where: {
+          where: 
+          {
             name: updateProviderDto.name,
           },
         }
       );
 
-      if (existingProvider && existingProvider.id !== id) {
+      if (existingProvider && existingProvider.id !== id) 
+      {
         throw new ConflictException('El nombre del proveedor ya está en uso');
       }
 
-      return await this.prismaService.provider.update(
+      return await this.prismaService.provider.update
+      (
         {
-          where: {
+          where: 
+          {
             id,
           },
-          data: {
+          data: 
+          {
             ...updateProviderDto,
           },
         }
       );
-    } catch (error) {
-      console.log(error);
-      throw error;
     }
+      catch (error) 
+      {
+        console.log(error);
+        throw error;
+      }
   }
 
-  async remove(id: number) {
-    try {
-      return await this.prismaService.provider.delete(
+  async remove(id: number) 
+  {
+    try 
+    {
+      return await this.prismaService.provider.delete
+      (
         {
-          where: {
+          where: 
+          {
             id,
           },
         }
       );
-    } catch (error) {
-      console.log(error);
-      throw error;
     }
+      catch (error) 
+      {
+        console.log(error);
+        throw error;
+      }
   }
 }

@@ -1,6 +1,7 @@
 import { IsOptional, IsString, Length } from 'class-validator';
 
-export class CreateProviderDto {
+export class CreateProviderDto 
+{
   @IsString({ message: 'El nombre debe ser texto' })
   @Length(3, 255, { message: 'El nombre debe tener entre 3 y 255 caracteres' })
   name!: string;

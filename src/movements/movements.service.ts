@@ -3,110 +3,136 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateMovementDto, MovementType } from './dto/create-movement.dto';
 
 @Injectable()
-export class MovementsService {
+
+export class MovementsService 
+{
   constructor(private prismaService: PrismaService) {}
 
-  async create(createMovementDto: CreateMovementDto) {
-    const user = await this.prismaService.user.findUnique(
+  async create(createMovementDto: CreateMovementDto) 
+  {
+    const user = await this.prismaService.user.findUnique
+    (
       {
-        where: {
+        where: 
+        {
           id: createMovementDto.userId,
         },
       }
     );
 
-    if (!user) {
+    if (!user) 
+    {
       throw new NotFoundException('Usuario no encontrado');
     }
-
     const productIds = createMovementDto.items.map((item) => item.productId);
     const uniqueProductIds = [...new Set(productIds)];
 
-    if (uniqueProductIds.length !== productIds.length) {
+    if (uniqueProductIds.length !== productIds.length) 
+    {
       throw new BadRequestException('No se pueden usar productos duplicados en el mismo movimiento');
     }
 
-    const products = await this.prismaService.product.findMany(
+    const products = await this.prismaService.product.findMany
+    (
       {
-        where: {
-          id: {
+        where: 
+        {
+          id: 
+          {
             in: uniqueProductIds,
           },
         },
       }
     );
 
-    if (products.length !== uniqueProductIds.length) {
+    if (products.length !== uniqueProductIds.length) 
+    {
       throw new NotFoundException('Algunos productos no existen');
     }
-
     const productById = new Map(products.map((product) => [product.id, product]));
+    createMovementDto.items.forEach
+    (
+      (item) => 
+      {
+        const product = productById.get(item.productId);
+        if (!product) 
+        {
+          throw new NotFoundException('Producto no encontrado');
+        }
 
-    createMovementDto.items.forEach((item) => {
-      const product = productById.get(item.productId);
-      if (!product) {
-        throw new NotFoundException('Producto no encontrado');
+        if (createMovementDto.type === MovementType.OUT && item.amount > product.stock) 
+        {
+          throw new BadRequestException(`No hay suficiente stock para el producto ${product.name}`);
+        }
       }
+    );
 
-      if (createMovementDto.type === MovementType.OUT && item.amount > product.stock) {
-        throw new BadRequestException(`No hay suficiente stock para el producto ${product.name}`);
-      }
-    });
-
-    const createdMovements = await this.prismaService.$transaction(async (prisma) => {
-      const records = [] as any[];
-
-      for (const item of createMovementDto.items) {
-        const product = productById.get(item.productId)!;
-        const stockChange = createMovementDto.type === MovementType.IN ? item.amount : -item.amount;
-
-        const createdMovement = await prisma.movements.create(
-          {
-            data: {
-              type: createMovementDto.type,
-              amount: item.amount,
-              priceUnit: product.priceUnit,
-              product: {
-                connect: {
-                  id: item.productId,
+    const createdMovements = await this.prismaService.$transaction
+    (
+      async (prisma) => 
+      {
+        const records = [] as any[];
+        for (const item of createMovementDto.items)
+        {
+          const product = productById.get(item.productId)!;
+          const stockChange = createMovementDto.type === MovementType.IN ? item.amount : -item.amount;
+          const createdMovement = await prisma.movements.create
+          (
+            {
+              data:
+              {
+                type: createMovementDto.type,
+                amount: item.amount,
+                priceUnit: product.priceUnit,
+                product:
+                {
+                  connect:
+                  {
+                    id: item.productId,
+                  },
+                },
+                user:
+                {
+                  connect:
+                  {
+                    id: createMovementDto.userId,
+                  },
                 },
               },
-              user: {
-                connect: {
-                  id: createMovementDto.userId,
-                },
+            }
+          );
+          await prisma.product.update
+          (
+            {
+              where: 
+              {
+                id: product.id,
               },
-            },
-          }
-        );
-
-        await prisma.product.update(
-          {
-            where: {
-              id: product.id,
-            },
-            data: {
-              stock: product.stock + stockChange,
-            },
-          }
-        );
-
-        records.push(createdMovement);
+              data: 
+              {
+                stock: product.stock + stockChange,
+              },
+            }
+          );
+          records.push(createdMovement);
+        }
+        return records;
       }
-
-      return records;
-    });
+    );
 
     const movementIds = createdMovements.map((movement) => movement.id);
-
-    return this.prismaService.movements.findMany(
+    return this.prismaService.movements.findMany
+    (
       {
-        where: {
-          id: {
+        where: 
+        {
+          id: 
+          {
             in: movementIds,
           },
         },
-        include: {
+        include: 
+        {
           product: true,
           user: true,
         },
@@ -114,32 +140,39 @@ export class MovementsService {
     );
   }
 
-  async findAll() {
-    return await this.prismaService.movements.findMany(
+  async findAll() 
+  {
+    return await this.prismaService.movements.findMany
+    (
       {
-        include: {
+        include: 
+        {
           product: true,
           user: true,
         },
-        orderBy: {
+        orderBy: 
+        {
           date: 'desc',
         },
       }
     );
   }
 
-  async findOne(id: number) {
-    return await this.prismaService.movements.findUnique(
+  async findOne(id: number) 
+  {
+    return await this.prismaService.movements.findUnique
+    (
       {
-        where: {
+        where: 
+        {
           id,
         },
-        include: {
+        include: 
+        {
           product: true,
           user: true,
         },
       }
     );
   }
-
-}
+} 
