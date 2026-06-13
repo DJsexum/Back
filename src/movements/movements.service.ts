@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateMovementDto, MovementType } from './dto/create-movement.dto';
+import { CreateMovementDto } from './dto/create-movement.dto';
+import { MovementType } from '@generated';
 
 @Injectable()
-
 export class MovementsService 
 {
   constructor(private prismaService: PrismaService) {}
@@ -76,6 +76,8 @@ export class MovementsService
         {
           const product = productById.get(item.productId)!;
           const stockChange = createMovementDto.type === MovementType.IN ? item.amount : -item.amount;
+
+          // ✅ CORREGIDO: Se mapea de forma plana 'productName' requerida por la restricción NOT NULL de la DB
           const createdMovement = await prisma.movements.create
           (
             {
@@ -84,6 +86,7 @@ export class MovementsService
                 type: createMovementDto.type,
                 amount: item.amount,
                 priceUnit: product.priceUnit,
+                productName: product.name, // Satisface la restricción física de la base de datos
                 product:
                 {
                   connect:
@@ -175,4 +178,63 @@ export class MovementsService
       }
     );
   }
-} 
+
+  async remove(id: number)
+  {
+    return this.prismaService.$transaction
+    (
+      async (prisma) =>
+      {
+        const movement = await prisma.movements.findUnique
+        (
+          {
+            where: { id },
+            include: { product: true },
+          }
+        );
+
+        if (!movement)
+        {
+          throw new NotFoundException('Movimiento no encontrado');
+        }
+
+        if (movement.product) 
+        {
+          const stockChange =
+            movement.type === MovementType.IN
+              ? -movement.amount
+              : movement.amount;
+
+          await prisma.product.update
+          (
+            {
+              where: { id: movement.productId },
+              data:
+              {
+                stock: movement.product.stock + stockChange,
+              },
+            }
+          );
+        }
+        else 
+        {
+          console.warn(`[Warning] El movimiento con ID ${id} está huérfano (su productId ${movement.productId} ya no existe). Se eliminará el registro del movimiento directamente sin actualizar stock.`);
+        }
+
+        const deleted = await prisma.movements.delete
+        (
+          {
+            where: { id },
+            include:
+            {
+              product: true,
+              user: true,
+            },
+          }
+        );
+
+        return deleted;
+      }
+    );
+  }
+}

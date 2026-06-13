@@ -1,11 +1,6 @@
 import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsPositive, Min, ValidateNested, ArrayMinSize } from 'class-validator';
 import { Type } from 'class-transformer';
-
-export enum MovementType 
-{
-  IN = 'IN',
-  OUT = 'OUT',
-}
+import { MovementType } from '@generated';
 
 export class MovementItemDto 
 {
